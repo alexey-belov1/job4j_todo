@@ -4,4 +4,46 @@
 
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
+
+  <servlet>
+    <servlet-name>GetItemsServlet</servlet-name>
+    <servlet-class>ru.job4j.todolist.servlet.GetItemsServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AddItemServlet</servlet-name>
+    <servlet-class>ru.job4j.todolist.servlet.AddItemServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>DeleteItemServlet</servlet-name>
+    <servlet-class>ru.job4j.todolist.servlet.DeleteItemServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>PerformItemServlet</servlet-name>
+    <servlet-class>ru.job4j.todolist.servlet.PerformItemServlet</servlet-class>
+  </servlet>
+
+
+  <servlet-mapping>
+    <servlet-name>GetItemsServlet</servlet-name>
+    <url-pattern>/get</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AddItemServlet</servlet-name>
+    <url-pattern>/add</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>DeleteItemServlet</servlet-name>
+    <url-pattern>/del</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>PerformItemServlet</servlet-name>
+    <url-pattern>/perform</url-pattern>
+  </servlet-mapping>
+
 </web-app>

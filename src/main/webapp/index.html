@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" ></script>
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+
+    <script>
+
+        $(document).ready(function(){
+            load();
+        });
+
+        function load() {
+            let showAll = $('#show-all')[0].checked;
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:8080/todolist/get',
+                data: {showAll: showAll},
+                dataType: 'json'
+            }).done(function (data) {
+                let table = '';
+                data.forEach(el => {
+                    table += '<tr>';
+                    if (el.done == false) {
+                        table += '<td><input type="button" class="btn btn-success" onclick="perform(' + el.id + ');" value="Выполнить"></td>';
+                    } else {
+                        table += '<td></td>';
+                    }
+                    table += '<td>' + el.id + '</td>';
+                    table += '<td>' + el.description + '</td>';
+                    let date = el.created.date;
+                    let time = el.created.time;
+                    table += '<td>' + time.hour + ':' + time.minute + ' ' + date.day + '.' + date.month + '.' + date.year + '</td>';
+                    if (el.done == false) {
+                        table += '<td><input type="checkbox" disabled></td>';
+                    } else {
+                        table += '<td><input type="checkbox" checked disabled></td>';
+                    }
+                    table += '<td><input type="button" class="btn" onclick="del(' + el.id + ');" value="Удалить"></td>';
+                    table += '</tr>';
+                });
+                $('#table tbody').html(table);
+            }).fail(function (err) {
+                alert(err);
+            });
+        };
+
+        function add() {
+            let desc = $('#desc').val();
+            if (desc != '') {
+                $.ajax({
+                    type: 'POST',
+                    url: 'http://localhost:8080/todolist/add',
+                    data: {desc: desc},
+                    success: function(){
+                        load();
+                    },
+                    error: function(){
+                        alert('error!');
+                    }
+                });
+            }
+        };
+
+        function del(id) {
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/todolist/del',
+                data: {id: id},
+                success: function(){
+                    load();
+                },
+                error: function(){
+                    alert('error!');
+                }
+            });
+        };
+
+        function perform(id) {
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/todolist/perform',
+                data: {id: id},
+                success: function(){
+                    load();
+                },
+                error: function(){
+                    alert('error!');
+                }
+            });
+        };
+
+    </script>
+
+    <title>Todolist</title>
+</head>
+<body>
+    <div class="container pt-3">
+        <div class="row">
+            <div class="card" style="width: 100%">
+                <div class="card-header">
+                    Добавить новое задание
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <input type="text" class="form-control" id="desc" title="Описание">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="add();">Создать</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container pt-3">
+        <div class="row">
+            <div class="card" style="width: 100%">
+                <div class="card-header">
+                    Список заданий
+                </div>
+                <div class="card-body">
+                    <input type="checkbox" id="show-all" data-toggle="toggle" data-on="Все задания" data-off="Невыполненные задания" onchange="load();">
+                </div>
+                <div class="card-body">
+                    <table id="table" class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;"></th>
+                                <th>Номер задания</th>
+                                <th>Описание</th>
+                                <th>Дата создания</th>
+                                <th>Статус</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
