@@ -8,8 +8,8 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import ru.job4j.todolist.model.Item;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class HSQLStore {
 
@@ -27,79 +27,46 @@ public class HSQLStore {
     }
 
     public Item create(Item item) {
-        Session session = sf.openSession();
-        Transaction tx = session.beginTransaction();
-        try {
-            session.save(item);
-            tx.commit();
-        } catch (Exception e) {
-            tx.rollback();
-            e.printStackTrace();
-        } finally {
-            session.close();
-        }
+        tx(session -> session.save(item));
         return item;
     }
 
     public void update(Item item) {
-        Session session = sf.openSession();
-        Transaction tx = session.beginTransaction();
-        try {
+        tx(session -> {
             session.update(item);
-            tx.commit();
-        } catch (Exception e) {
-            tx.rollback();
-            e.printStackTrace();
-        } finally {
-            session.close();
-        }
+            return null;
+        });
     }
 
     public void delete(Integer id) {
-        Session session = sf.openSession();
-        Transaction tx = session.beginTransaction();
-        try {
+        tx(session -> {
             Item item = new Item(null);
             item.setId(id);
             session.delete(item);
-            tx.commit();
-        } catch (Exception e) {
-            tx.rollback();
-            e.printStackTrace();
-        } finally {
-            session.close();
-        }
+            return null;
+        });
     }
 
     public List<Item> findAll() {
-        List<Item> result = new ArrayList<>();
-        Session session = sf.openSession();
-        Transaction tx = session.beginTransaction();
-        try {
-            result = session.createQuery("from ru.job4j.todolist.model.Item").list();
-            tx.commit();
-        } catch (Exception e) {
-            tx.rollback();
-            e.printStackTrace();
-        } finally {
-            session.close();
-        }
-        return result;
+        return tx(session -> session.createQuery("from ru.job4j.todolist.model.Item").list());
     }
 
     public Item findById(Integer id) {
-        Item result = null;
+        return tx(session -> session.get(Item.class, id));
+    }
+
+    private <T> T tx(final Function<Session, T> command) {
         Session session = sf.openSession();
         Transaction tx = session.beginTransaction();
         try {
-            result = session.get(Item.class, id);
+            T result = command.apply(session);
             tx.commit();
-        } catch (Exception e) {
+            return result;
+        } catch (final Exception e) {
             tx.rollback();
-            e.printStackTrace();
+            throw e;
         } finally {
             session.close();
         }
-        return result;
     }
 }
