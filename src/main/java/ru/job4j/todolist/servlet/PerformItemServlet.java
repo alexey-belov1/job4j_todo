@@ -1,5 +1,6 @@
 package ru.job4j.todolist.servlet;
 
+import ru.job4j.todolist.model.Item;
 import ru.job4j.todolist.store.HSQLStore;
 
 import javax.servlet.ServletException;
@@ -14,7 +15,7 @@ public class PerformItemServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
         int id = Integer.parseInt(req.getParameter("id"));
         HSQLStore store = HSQLStore.instOf();
-        Optional.of(store.findById(id)).ifPresent(item -> {
+        Optional.ofNullable(store.findById(Item.class, id)).ifPresent(item -> {
             item.setDone(true);
             store.update(item);
         });

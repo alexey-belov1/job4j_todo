@@ -15,8 +15,42 @@
     <script>
 
         $(document).ready(function(){
+            auth();
             load();
         });
+
+        function auth() {
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/todolist/auth',
+                dataType: 'json'
+            }).done(function (data) {
+                let a1 = $('#a1');
+                let a2 = $('#a2');
+                if (data.name === undefined) {
+                    a1.text("Войти").attr("href", "http://localhost:8080/todolist/login.html");
+                    a2.text("Регистрация").attr("href", "http://localhost:8080/todolist/reg.html");
+                } else {
+                    a1.text(data.name);
+                    a2.text("Выйти").attr("onclick", "logout();return false;");
+                }
+            }).fail(function (err) {
+                alert(err);
+            });
+        }
+
+        function logout() {
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/todolist/logout',
+                success: function(){
+                    auth();
+                },
+                error: function(){
+                    alert('error!');
+                }
+            });
+        }
 
         function load() {
             let showAll = $('#show-all')[0].checked;
@@ -29,7 +63,7 @@
                 let table = '';
                 data.forEach(el => {
                     table += '<tr>';
-                    if (el.done == false) {
+                    if (el.done === false) {
                         table += '<td><input type="button" class="btn btn-success" onclick="perform(' + el.id + ');" value="Выполнить"></td>';
                     } else {
                         table += '<td></td>';
@@ -39,10 +73,15 @@
                     let date = el.created.date;
                     let time = el.created.time;
                     table += '<td>' + time.hour + ':' + time.minute + ' ' + date.day + '.' + date.month + '.' + date.year + '</td>';
-                    if (el.done == false) {
+                    if (el.done === false) {
                         table += '<td><input type="checkbox" disabled></td>';
                     } else {
                         table += '<td><input type="checkbox" checked disabled></td>';
+                    }
+                    if (el.user === undefined) {
+                        table += '<td>Anonymous</td>';
+                    } else {
+                        table += '<td>' + el.user.name + '</td>';
                     }
                     table += '<td><input type="button" class="btn" onclick="del(' + el.id + ');" value="Удалить"></td>';
                     table += '</tr>';
@@ -51,11 +90,11 @@
             }).fail(function (err) {
                 alert(err);
             });
-        };
+        }
 
         function add() {
             let desc = $('#desc').val();
-            if (desc != '') {
+            if (desc !== '') {
                 $.ajax({
                     type: 'POST',
                     url: 'http://localhost:8080/todolist/add',
@@ -68,7 +107,7 @@
                     }
                 });
             }
-        };
+        }
 
         function del(id) {
             $.ajax({
@@ -82,7 +121,7 @@
                     alert('error!');
                 }
             });
-        };
+        }
 
         function perform(id) {
             $.ajax({
@@ -96,13 +135,21 @@
                     alert('error!');
                 }
             });
-        };
+        }
 
     </script>
 
     <title>Todolist</title>
 </head>
 <body>
+    <div class="container pt-3">
+        <div class="row">
+            <ul class="nav" id="auth">
+                <li class="nav-item"><a class="nav-link" href="#" id="a1"></a></li>
+                <li class="nav-item"><a class="nav-link" href="#" id="a2"></a></li>
+            </ul>
+        </div>
+    </div>
     <div class="container pt-3">
         <div class="row">
             <div class="card" style="width: 100%">
@@ -139,6 +186,7 @@
                                 <th>Описание</th>
                                 <th>Дата создания</th>
                                 <th>Статус</th>
+                                <th>Автор</th>
                                 <th></th>
                             </tr>
                         </thead>

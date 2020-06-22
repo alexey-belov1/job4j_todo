@@ -6,7 +6,7 @@ import org.hibernate.Transaction;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import ru.job4j.todolist.model.Item;
+import ru.job4j.todolist.model.User;
 
 import java.util.List;
 import java.util.function.Function;
@@ -26,33 +26,39 @@ public class HSQLStore {
         return INST;
     }
 
-    public Item create(Item item) {
-        tx(session -> session.save(item));
-        return item;
+    public <T> T create(T model) {
+        tx(session -> session.save(model));
+        return model;
     }
 
-    public void update(Item item) {
+    public <T> void update(T model) {
         tx(session -> {
-            session.update(item);
+            session.update(model);
             return null;
         });
     }
 
-    public void delete(Integer id) {
+    public <T> void delete(T model) {
         tx(session -> {
-            Item item = new Item(null);
-            item.setId(id);
-            session.delete(item);
+            session.delete(model);
             return null;
         });
     }
 
-    public List<Item> findAll() {
-        return tx(session -> session.createQuery("from ru.job4j.todolist.model.Item").list());
+    public <T> List<T> findAll(Class<T> cl) {
+        return tx(session -> session.createQuery("from " + cl.getName(), cl).list());
     }
 
-    public Item findById(Integer id) {
-        return tx(session -> session.get(Item.class, id));
+    public <T> T findById(Class<T> cl, Integer id) {
+        return tx(session -> session.get(cl, id));
+    }
+
+    public User findUserByEmail(String email) {
+        return tx(session ->
+                (User) session.createQuery("from ru.job4j.todolist.model.User where email = :email")
+                        .setParameter("email", email)
+                        .uniqueResult()
+        );
     }
 
     private <T> T tx(final Function<Session, T> command) {

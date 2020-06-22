@@ -1,20 +1,15 @@
 package ru.job4j.todolist.servlet;
 
-import ru.job4j.todolist.model.Item;
-import ru.job4j.todolist.store.HSQLStore;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-public class DeleteItemServlet extends HttpServlet {
+public class LogoutServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
-        int id = Integer.parseInt(req.getParameter("id"));
-        Item item = new Item();
-        item.setId(id);
-        HSQLStore.instOf().delete(item);
+        req.getSession().invalidate();
     }
 }

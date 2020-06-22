@@ -21,7 +21,7 @@ public class GetItemsServlet extends HttpServlet {
         resp.setContentType("text/plain");
         resp.setCharacterEncoding("windows-1251");
         boolean showAll = Boolean.parseBoolean(req.getParameter("showAll"));
-        List<Item> items = HSQLStore.instOf().findAll();
+        List<Item> items = HSQLStore.instOf().findAll(Item.class);
         if (!showAll) {
             items = items.stream().filter(x -> !x.isDone()).collect(Collectors.toList());
         }
