@@ -3,6 +3,12 @@ language: java
 jdk:
   - openjdk14
 
+services:
+  - postgresql
+
+before_install:
+  - psql -c 'create database mapping;' -U postgres
+
 # используем режим обычного пользователя для сборки проекта.
 sudo: false
 
@@ -18,3 +24,7 @@ notifications:
       -veshousis1@gmail.com
     on_success: never # default: change
     on_failure: always # default: always
+
+env:
+  global:
+    - CODECOV_TOKEN="fe077ce0-f3bf-4f91-b52e-5cf39577d1fd"

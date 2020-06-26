@@ -1,0 +1,19 @@
+<hibernate-mapping package="ru.job4j.mapping.model">
+    <class name="Car" table="car">
+        <id name="id" type="int" column="id">
+            <generator class="identity"/>
+        </id>
+        <property name="name" type="string" column="name" not-null="true"/>
+        <many-to-one name="engine" class="Engine"
+                     column="engine_id" unique="true" not-null="true"
+                     cascade="all" />
+        <set name="drivers" table="history_owner" lazy="false" cascade="persist, refresh">
+            <key>
+                <column name="car_id" not-null="true"/>
+            </key>
+            <many-to-many class="Driver" >
+                <column name="driver_id" not-null="true"/>
+            </many-to-many>
+        </set>
+    </class>
+</hibernate-mapping>
