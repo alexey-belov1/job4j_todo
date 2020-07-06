@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" ></script>
+
+    <script>
+
+        $(document).ready(function(){
+            auth();
+            loadPosts();
+        });
+
+        function auth() {
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/cars/auth',
+                dataType: 'json'
+            }).done(function (data) {
+                let a1 = $('#a1');
+                let a2 = $('#a2');
+                let add = $('#add');
+                let userId = $('#userId');
+                if (data.userName === undefined) {
+                    a1.text("Войти").attr("href", "http://localhost:8080/cars/login.html");
+                    a2.text("Регистрация").attr("href", "http://localhost:8080/cars/reg.html");
+                    add.prop('hidden', true);
+                    userId.val(-1);
+                } else {
+                    a1.text(data.userName);
+                    a2.text("Выйти").attr("onclick", "logout();return false;");
+                    add.prop('hidden', false);
+                    userId.val(data.userId);
+                }
+            }).fail(function (err) {
+                alert(err);
+            });
+        }
+
+        function logout() {
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/cars/logout',
+                success: function(){
+                    auth();
+                    loadPosts();
+                },
+                error: function(){
+                    alert('error!');
+                }
+            });
+        }
+
+        function loadPosts() {
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:8080/cars/getPosts',
+                dataType: 'json'
+            }).done(function (data) {
+                let table = '';
+                let userId = $('#userId').val();
+                data.forEach(el => {
+                    table += '<tr>';
+                    let img = (el.photo !== null) ? '<img src=http://localhost:8080/cars/download?photoId=' + el.photo.id + ' width="80px" height="80px"/>' : '';
+                    table += '<td>' + img + '</td>';
+
+                    table += '<td>' + el.mark.name + '</td>';
+                    table += '<td>' + el.model.name + '</td>';
+                    table += '<td>' + el.body.name + '</td>';
+                    table += '<td>' + el.colour.name + '</td>';
+                    table += '<td>' + el.mileage + '</td>';
+                    table += '<td>' + el.user.name + '</td>';
+
+                    let status = (el.status === true) ? 'Активно' : 'Продано';
+                    table += '<td>' + status + '</td>';
+
+                    let created = el.created;
+                    table += '<td>' + created.hour + ':' + created.minute + ' ' + created.dayOfMonth + '.' + created.monthValue + '.' + created.year + '</td>';
+
+                    if (userId == el.user.id) {
+                        let checked = (el.status === true) ? 'checked' : '';
+                        table += '<td><label><input type="checkbox" ' + checked + ' onchange="changeStatus(' + el.id + ', this)"> Активно</label></td>';
+                        table += '<td><a href=# onclick=del(' + el.id + ')><i class="fa fa-trash" ></i></a></td>';
+                    } else {
+                        table += '<td></td>';
+                        table += '<td></td>';
+                    }
+                    table += '</tr>';
+                });
+                $('#table tbody').html(table);
+            }).fail(function (err) {
+                alert(err);
+            });
+        }
+
+        function del(id) {
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/cars/delete',
+                data: {id: id},
+                success: function(){
+                    loadPosts();
+                },
+                error: function(){
+                    alert('error!');
+                }
+            });
+        }
+
+        function changeStatus(id, el) {
+            let check = el.checked;
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/cars/changeStatus',
+                data: {id: id, check: check},
+                success: function(){
+                    loadPosts();
+                },
+                error: function(){
+                    alert('error!');
+                }
+            });
+        }
+
+    </script>
+
+    <title>Cars</title>
+</head>
+<body>
+    <div class="container pt-3">
+        <div class="row">
+            <ul class="nav">
+                <li class="nav-item"><a class="nav-link" href="#" id="a1"></a></li>
+                <li class="nav-item"><a class="nav-link" href="#" id="a2"></a></li>
+            </ul>
+            <input type="hidden" id="userId">
+        </div>
+    </div>
+    <div class="container" id="add" hidden>
+        <div class="row">
+            <div style="margin-left: auto;">
+                <form action="http://localhost:8080/cars/post.html">
+                    <button type="submit" class="btn btn-primary">Добавить объявление</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="container pt-3">
+        <div class="row">
+            <div class="card" style="width: 100%">
+                <div class="card-header">
+                    Список объявлений
+                </div>
+                <div class="card-body">
+                    <table id="table" class="table">
+                        <thead>
+                            <tr>
+                                <th>Фото</th>
+                                <th>Марка</th>
+                                <th>Модель</th>
+                                <th>Кузов</th>
+                                <th>Цвет</th>
+                                <th>Пробег (км)</th>
+                                <th>Продавец</th>
+                                <th>Статус</th>
+                                <th style="width: 140px;">Дата размещения</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

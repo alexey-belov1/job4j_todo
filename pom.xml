@@ -9,6 +9,7 @@
   <version>1.0</version>
   <modules>
     <module>mapping</module>
+      <module>cars</module>
   </modules>
   <packaging>pom</packaging>
 

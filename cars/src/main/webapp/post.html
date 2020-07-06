@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" ></script>
+
+    <script>
+        $(document).ready(function(){
+            protection();
+            loadColours();
+            loadMarks();
+        });
+
+        function protection() {
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/cars/auth',
+                dataType: 'json'
+            }).done(function (data) {
+                if (data.userName === undefined) {
+                    window.location.href = 'http://localhost:8080/cars/index.html';
+                }
+            }).fail(function (err) {
+                alert(err);
+            });
+        }
+
+        function loadMarks() {
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:8080/cars/getMarks',
+                dataType: 'json'
+            }).done(function (data) {
+                let options =  '';
+                data.forEach(el => options += '<option value=' + el.id + '>' + el.name + '</option>');
+                $('#mark').append(options).prop('selectedIndex', -1);
+            }).fail(function (err) {
+                alert(err);
+            });
+        }
+
+        function loadModels() {
+            let markId = $( "#mark option:selected" ).val();
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:8080/cars/getModels',
+                data: {id: markId},
+                dataType: 'json'
+            }).done(function (data) {
+                let options =  '';
+                data.forEach(el => options += '<option value=' + el.id + '>' + el.name + '</option>');
+                $('#model').html(options).prop({'selectedIndex': -1, 'disabled' : false});
+                $('#body').html('').prop('disabled', true);
+            }).fail(function (err) {
+                alert(err);
+            });
+        }
+
+        function loadBodies() {
+            let modelId = $( "#model option:selected" ).val();
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:8080/cars/getBodies',
+                data: {id: modelId},
+                dataType: 'json'
+            }).done(function (data) {
+                let options =  '';
+                data.forEach(el => options += '<option value=' + el.id + '>' + el.name + '</option>');
+                $('#body').html(options).prop({'selectedIndex': -1, 'disabled' : false});
+            }).fail(function (err) {
+                alert(err);
+            });
+        }
+
+        function loadColours() {
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:8080/cars/getColours',
+                dataType: 'json'
+            }).done(function (data) {
+                let options =  '';
+                data.forEach(el => options += '<option value=' + el.id + '>' + el.name + '</option>');
+                $('#colour').html(options).prop('selectedIndex', -1);
+            }).fail(function (err) {
+                alert(err);
+            });
+        }
+
+        $(document).on('change', '.custom-file-input', function() {
+            let fileName = $(this).val().split('\\').pop();
+            $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        });
+
+        function send(){
+            let formData = new FormData();
+            formData.append('mark', $('#mark').val());
+            formData.append('model', $('#model').val());
+            formData.append('body', $('#body').val());
+            formData.append('mileage', $('#mileage').val());
+            formData.append('colour', $('#colour').val());
+            jQuery.each($('#file')[0].files, function(i, file) {
+                formData.append('file', file);
+            });
+
+            $.ajax({
+                url: "http://localhost:8080/cars/add",
+                type: "POST",
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function(){
+                    window.location.href = 'http://localhost:8080/cars/index.html';
+                },
+                error: function(){
+                    alert('error!');
+                }
+            });
+        }
+
+        function validate() {
+            let msg = $("#msg");
+            if ($("#mark option:selected").val() === undefined) {
+                msg.text('Веберите марку');
+                return false;
+            }
+            if ($("#model option:selected").val() === undefined) {
+                msg.text('Веберите модель');
+                return false;
+            }
+            if ($("#body option:selected").val() === undefined) {
+                msg.text('Веберите тип кузова');
+                return false;
+            }
+            if ($("#colour option:selected").val() === undefined) {
+                msg.text('Веберите цвет');
+                return false;
+            }
+
+            let mileage = $("#mileage");
+            if (mileage.val() === '') {
+                msg.text('Укажите пробег');
+                return false;
+            }
+            if (!/^[1-9][0-9]*$/.test(mileage.val())) {
+                msg.text('Некорректно указан пробег');
+                return false;
+            }
+            return true;
+        }
+
+        function execute() {
+            if (validate()) {
+                send();
+            }
+        }
+
+    </script>
+
+    <title>Cars</title>
+</head>
+<body>
+    <div class="container pt-3">
+        <div class="row">
+            <div class="card" style="width: 100%">
+                <div class="card-header">
+                    Новое объявление
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="mark">Марка</label>
+                            <select class="form-control" id="mark" onchange="loadModels()" ></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Модель</label>
+                            <select class="form-control" id="model" onchange="loadBodies()" disabled></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="body">Кузов</label>
+                            <select class="form-control" id="body" disabled></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="colour">Цвет</label>
+                            <select class="form-control" id="colour"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mileage">Пробег (км)</label>
+                            <input type="text" class="form-control" id="mileage" title="пробег">
+                        </div>
+                        <div class="form-group">
+                            <label>Фото</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="file">
+                                <label class="custom-file-label" for="file"></label>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="execute()">Создать</button>
+                        <p id="msg"></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
