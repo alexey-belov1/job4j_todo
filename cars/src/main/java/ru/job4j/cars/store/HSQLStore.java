@@ -1,12 +1,11 @@
 package ru.job4j.cars.store;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
+import org.hibernate.*;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import ru.job4j.cars.model.User;
+import ru.job4j.cars.service.FilterDB;
 
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -52,6 +51,18 @@ public class HSQLStore {
 
     public <T> List<T> findAll(Class<T> cl) {
         return tx(session -> session.createQuery("from " + cl.getName(), cl).list());
+    }
+
+    public <T> List<T> findWithFilter(Class<T> cl, List<FilterDB> filters) {
+        return tx(session -> {
+            for (FilterDB filter : filters) {
+                session.enableFilter(filter.getName());
+                if (filter.withParameter()) {
+                    session.getEnabledFilter(filter.getName()).setParameter(filter.getParamName(), filter.getParamValue());
+                }
+            }
+            return session.createQuery("from " + cl.getName(), cl).list();
+        });
     }
 
     public <T> T findById(Class<T> cl, Integer id) {

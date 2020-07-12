@@ -1,11 +1,29 @@
 package ru.job4j.cars.model;
 
+import org.hibernate.annotations.*;
+
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "post")
+@FilterDefs( {
+        @FilterDef(name="withPhoto", defaultCondition = "photo_id is not null"),
+        @FilterDef(name = "onlyToday", defaultCondition = "created > 'today'"),
+        @FilterDef(
+                name = "withMarkId",
+                parameters = @ParamDef(name = "mark_id", type = "int")
+        )
+} )
+@Filters( {
+        @Filter(name="withPhoto"),
+        @Filter(name="onlyToday"),
+        @Filter(name="withMarkId", condition = "mark_id = :mark_id"),
+})
 public class Post {
 
     @Id

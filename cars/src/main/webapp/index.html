@@ -9,11 +9,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" ></script>
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
 
     <script>
 
         $(document).ready(function(){
             auth();
+            loadMarks();
             loadPosts();
         });
 
@@ -58,9 +61,13 @@
         }
 
         function loadPosts() {
+            let withPhoto = $('#withPhoto')[0].checked;
+            let onlyToday = $('#onlyToday')[0].checked;
+            let markId = $('#mark').val();
             $.ajax({
                 type: 'GET',
                 url: 'http://localhost:8080/cars/getPosts',
+                data: {withPhoto : withPhoto, onlyToday : onlyToday, markId : markId},
                 dataType: 'json'
             }).done(function (data) {
                 let table = '';
@@ -128,6 +135,20 @@
             });
         }
 
+        function loadMarks() {
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:8080/cars/getMarks',
+                dataType: 'json'
+            }).done(function (data) {
+                let options =  '';
+                data.forEach(el => options += '<option value=' + el.id + '>' + el.name + '</option>');
+                $('#mark').append(options);
+            }).fail(function (err) {
+                alert(err);
+            });
+        }
+
     </script>
 
     <title>Cars</title>
@@ -148,6 +169,32 @@
                 <form action="http://localhost:8080/cars/post.html">
                     <button type="submit" class="btn btn-primary">Добавить объявление</button>
                 </form>
+            </div>
+        </div>
+    </div>
+    <div class="container pt-3">
+        <div class="row">
+            <div class="card" style="width: 100%">
+                <div class="card-header">
+                    Фильтры
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <td>
+                                <input type="checkbox" data-toggle="toggle" data-on="Только с фото" data-off="Все" id="withPhoto" onchange="loadPosts()">
+                            </td>
+                            <td>
+                                <input type="checkbox" data-toggle="toggle" data-on="За последний день" data-off="Все" id="onlyToday" onchange="loadPosts()">
+                            </td>
+                            <td>
+                                <select class="form-control" id="mark" onchange="loadPosts()">
+                                    <option value="-1">Все марки</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
