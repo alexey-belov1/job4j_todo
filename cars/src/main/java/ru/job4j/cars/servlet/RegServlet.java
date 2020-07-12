@@ -16,8 +16,6 @@ public class RegServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("windows-1251");
         String name = req.getParameter("name");
         String email = req.getParameter("email");
         String password = req.getParameter("password");

@@ -19,8 +19,6 @@ public class GetBodiesServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("windows-1251");
         int id = Integer.parseInt(req.getParameter("id"));
         Model model = HSQLStore.instOf().findById(Model.class, id);
         List<Body> bodies = new ArrayList<>(model.getBodies());

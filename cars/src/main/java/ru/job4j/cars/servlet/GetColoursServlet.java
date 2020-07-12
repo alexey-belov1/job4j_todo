@@ -16,8 +16,6 @@ import java.util.List;
 public class GetColoursServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("windows-1251");
         List<Colour> colours = HSQLStore.instOf().findAll(Colour.class);
         colours.sort(Comparator.comparing(Colour::getName));
         ObjectMapper mapper = new ObjectMapper();

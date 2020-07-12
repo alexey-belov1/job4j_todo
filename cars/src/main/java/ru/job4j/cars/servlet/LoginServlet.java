@@ -16,8 +16,6 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("windows-1251");
         String email = req.getParameter("email");
         String password = req.getParameter("password");
         ObjectNode node = new ObjectMapper().createObjectNode();

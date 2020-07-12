@@ -15,8 +15,6 @@ public class AuthServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("windows-1251");
         JsonObject json = new JsonObject();
         Optional.ofNullable((User) req.getSession().getAttribute("user")).ifPresent(
                 user ->  {

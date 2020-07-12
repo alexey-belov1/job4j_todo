@@ -19,8 +19,6 @@ public class GetModelsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("windows-1251");
         int id = Integer.parseInt(req.getParameter("id"));
         Mark mark = HSQLStore.instOf().findById(Mark.class, id);
         List<Model> models = new ArrayList<>(mark.getModels());

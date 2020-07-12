@@ -19,8 +19,6 @@ public class GetPostsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("windows-1251");
         List<FilterDB> filters = new ArrayList<>();
 
         if (Boolean.parseBoolean(req.getParameter("withPhoto"))) {

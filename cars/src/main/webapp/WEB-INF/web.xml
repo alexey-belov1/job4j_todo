@@ -5,6 +5,16 @@
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
 
+  <filter>
+    <filter-name>ContentTypeEncodingFilter</filter-name>
+    <filter-class>ru.job4j.cars.filter.ContentTypeEncodingFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>ContentTypeEncodingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
   <servlet>
     <servlet-name>AddServlet</servlet-name>
     <servlet-class>ru.job4j.cars.servlet.AddPostServlet</servlet-class>
